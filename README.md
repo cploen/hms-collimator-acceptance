@@ -99,3 +99,25 @@ central passage, horizontal/vertical/diagonal failures, an exit-only failure, sa
 counts, and canvas persistence. Production validation on ifarm is pending. Local
 ACLiC compilation was blocked by a macOS C++ header-path issue; the documented
 command uses interpreted ROOT.
+
+## Performance
+
+The macro enables only leaves required by the target variables, identifiers,
+and configured selection (including Sum$ cluster arrays and their counters).
+Selection expressions should name leaves directly, rather than use external aliases.
+It prints an initial message and progress every 10000 entries. A delay before
+"Starting" can occur during file opening or formula setup; a delay after a progress
+message can occur during reading. Farm I/O performance has not been measured locally.
+The optimized path was checked with a variable-length cluster array and multiple
+in-window clusters per event; selected-event counts remained unchanged.
+
+## KinC_x36_5 run-list context
+
+User-supplied list: 145 runs, 1369 segments. HMS angles are -16.43 or -16.44 deg;
+beam energies span 10.54089453–10.5437901 GeV. Targets include LD2 (75 runs), LH2
+(49), dummy (19), and carbon (2). NPS distances include 307, 407, and 357 cm;
+NPS angles and trigger metadata also vary. HMS central momentum is not supplied.
+Do not pool targets or assume identical selection conditions across this list.
+The NPS cluster timing requirement can couple the selected HMS population to NPS
+configuration. Retain target, trigger, and NPS configuration labels in run comparisons.
+The initial 2189 check uses only segment 0 of 12 listed segments for that run.

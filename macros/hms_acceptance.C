@@ -2,6 +2,9 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <TTreeFormula.h>
+#include <TLeaf.h>
+#include <TBranch.h>
+#include <TStopwatch.h>
 #include <TEnv.h>
 #include <TH1D.h>
 #include <TH2D.h>
@@ -60,6 +63,24 @@ void hms_acceptance(const char* input,const char* outdir="results/run2189",
   }
   TTreeFormula sel("selection",cut.c_str(),t);
   if(sel.GetNdim()<=0) throw std::runtime_error("Invalid selection expression");
+  // Read only formula dependencies, including counters for variable-length arrays.
+  t->SetBranchStatus("*",0);
+  auto enable=[&](TTreeFormula& formula){
+    for(int code=0;code<formula.GetNcodes();++code){
+      auto leaf=formula.GetLeaf(code); if(!leaf)continue;
+      t->SetBranchStatus(leaf->GetBranch()->GetName(),1);
+      if(auto count=leaf->GetLeafCount())t->SetBranchStatus(count->GetBranch()->GetName(),1);
+    }
+  };
+  enable(sel); for(auto& formula:f)enable(*formula);
+  // Sum$ uses a nested formula whose leaves may not appear in GetNcodes().
+  // Also enable leaves explicitly named in the configured expression.
+  for(auto object:*t->GetListOfLeaves()){
+    auto leaf=dynamic_cast<TLeaf*>(object);
+    if(!leaf || cut.find(leaf->GetName())==std::string::npos)continue;
+    t->SetBranchStatus(leaf->GetBranch()->GetName(),1);
+    if(auto count=leaf->GetLeafCount())t->SetBranchStatus(count->GetBranch()->GetName(),1);
+  }
   if(gSystem->mkdir(outdir,kTRUE)!=0 && gSystem->AccessPathName(outdir)) throw std::runtime_error("Cannot create output directory");
   // NEW prevents accidental replacement of an earlier result.
   TFile out(Form("%s/acceptance.root",outdir),"NEW");
@@ -88,7 +109,14 @@ void hms_acceptance(const char* input,const char* outdir="results/run2189",
   if(!csv) throw std::runtime_error("Cannot write CSV");
   csv<<"run,event,entry,xtar,ytar,xptar,yptar,delta,reactz,x_front,y_front,x_back,y_back,front_margin_cm,back_margin_cm,failed_face_mask\n"<<std::setprecision(12);
   Long64_t selected=0,invalid=0,nfront=0,nback=0,noutside=0;
+  TStopwatch timer; timer.Start();
+  std::cout<<"Starting "<<t->GetEntries()<<" entries from "<<input<<std::endl;
   for(Long64_t entry=0;entry<t->GetEntries();++entry){
+    if(entry%10000==0){
+      std::cout<<"Processed "<<entry<<" / "<<t->GetEntries()<<", selected "<<selected
+               <<", elapsed "<<timer.RealTime()<<" s"<<std::endl;
+      timer.Continue();
+    }
     if(t->GetEntry(entry)<0) throw std::runtime_error("Input read failed");
     sel.GetNdata(); if(!sel.EvalInstance())continue;
     double v[8]; bool valid=true;
