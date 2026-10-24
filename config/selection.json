@@ -1,0 +1,10 @@
+{
+  "tree": "T",
+  "baseline_cut": "H.gtr.ok && H.cer.npeSum>2 && H.cal.etottracknorm>0.65 && Sum$(NPS.cal.clusT>=147 && NPS.cal.clusT<=153)>0",
+  "timing_interval_ns": [
+    147,
+    153
+  ],
+  "timing_status": "initial study selection, at least one cluster; count each event once",
+  "geometry_status": "provisional; survey and installed collimator to confirm"
+}
