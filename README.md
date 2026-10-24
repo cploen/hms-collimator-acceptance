@@ -64,3 +64,38 @@ until Christine discusses the desired scope with Charles.
 
 Outside fractions among recorded events are reconstruction consistency
 diagnostics, not absolute efficiencies.
+
+## Running the first pass
+
+From the repository root (ROOT 6):
+
+```sh
+root -l -b -q 'macros/hms_acceptance.C("/cache/hallc/c-nps/analysis/pass2/replays/production/nps_hms_coin_2189_0_1_-1.root","results/run2189_v1")'
+```
+
+The macro reads **config/study.conf** (the authoritative runtime configuration).
+The JSON selection file is an earlier baseline record. To use another geometry
+or selection, copy the .conf and supply its path as the third macro argument.
+
+Outputs: acceptance.root (histograms, canvases, configuration and counts),
+outside_events.csv, summary.txt. Open the ROOT file in a TBrowser to view the
+saved canvases. Results are ignored by git. Use a new output directory on rerun;
+the macro refuses to overwrite an existing acceptance.root.
+
+Outside means outside either face; front and back counts are also saved
+separately. CSV failed_face_mask is 1=front, 2=back, 3=both. The event is counted
+once regardless of how many NPS clusters satisfy the timing selection. Nonfinite
+target coordinates are counted separately and excluded from diagnostic histograms.
+Histograms have fixed display ranges; inspect underflow/overflow before interpreting
+fractions. Vertex-fraction bins with no events have no acceptance information.
+
+The provisional back plane is front+6.35 cm, using documented back dimensions.
+Both faces share a center and orientation. For a straight track and a linearly
+flared convex octagon, passing both faces implies passage through the interior.
+These assumptions remain subject to geometry confirmation.
+
+Local validation: interpreted ROOT 6.36 synthetic test checked timing rejection,
+central passage, horizontal/vertical/diagonal failures, an exit-only failure, saved
+counts, and canvas persistence. Production validation on ifarm is pending. Local
+ACLiC compilation was blocked by a macOS C++ header-path issue; the documented
+command uses interpreted ROOT.
