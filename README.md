@@ -1,3 +1,15 @@
+## To Run:
+```bash 
+cd /work/hallc/nps/cploen/analysis/hms-collimator-acceptance && root -l -b -q 'macros/hms_acceptance.C("/cache/hallc/c-nps/analysis/pass2/replays/production/nps_hms_coin_2189_0_1_-1.root","results/run2189_v2")'
+```
+## To Create a New PDF with Red Octagon
+``` bash
+cd /work/hallc/nps/cploen/analysis/hms-collimator-acceptance && root -l -b -q -e 'TFile f("results/run2189_v1/acceptance.root"); auto h=f.Get<TH2D>("front_all"); auto c=new TCanvas("share","",1300,850); c->SetLogz(); c->SetRightMargin(0.14); h->SetStats(0); h->SetTitle("Run 2189 segment 0: provisional collimator front;Projected y (horizontal, cm);Projected x (vertical, cm)"); h->Draw("colz"); double y[9]={-2.2875,2.2875,4.575,4.575,2.2875,-2.2875,-4.575,-4.575,-2.2875}; double x[9]={11.646,11.646,5.823,-5.823,-11.646,-11.646,-5.823,5.823,11.646}; TPolyLine aperture(9,y,x); aperture.SetLineColor(kRed); aperture.SetLineWidth(4); aperture.Draw("same"); c->Print("results/run2189_v1/charles_preliminary_with_aperture.pdf("); f.Get<TCanvas>("pairs_all")->Print("results/run2189_v1/charles_preliminary_with_aperture.pdf)");'
+```
+## To Count Events Outside the Collimator Acceptance:
+```bash
+root -l -b -q -e 'TFile f("results/run2189_v1/acceptance.root"); auto s=f.Get<TParameter<Long64_t>>("selected")->GetVal(); auto bad=f.Get<TParameter<Long64_t>>("invalid")->GetVal(); auto front=f.Get<TParameter<Long64_t>>("outside_front")->GetVal(); auto either=f.Get<TParameter<Long64_t>>("outside_either")->GetVal(); cout<<"Finite events: "<<s-bad<<"\nOutside front: "<<front<<" / "<<s-bad<<" = "<<100.0*front/(s-bad)<<"%\nOutside either face: "<<either<<" / "<<s-bad<<" = "<<100.0*either/(s-bad)<<"%\n";'
+```
 # HMS collimator acceptance study
 
 Determine whether reconstructed production tracks intersect the physical HMS
