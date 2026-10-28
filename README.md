@@ -9,6 +9,8 @@ cd /work/hallc/nps/cploen/analysis/hms-collimator-acceptance && root -l -b -q -e
 ## To Count Events Outside the Collimator Acceptance:
 ```bash
 root -l -b -q -e 'TFile f("results/run2189_v1/acceptance.root"); auto s=f.Get<TParameter<Long64_t>>("selected")->GetVal(); auto bad=f.Get<TParameter<Long64_t>>("invalid")->GetVal(); auto front=f.Get<TParameter<Long64_t>>("outside_front")->GetVal(); auto either=f.Get<TParameter<Long64_t>>("outside_either")->GetVal(); cout<<"Finite events: "<<s-bad<<"\nOutside front: "<<front<<" / "<<s-bad<<" = "<<100.0*front/(s-bad)<<"%\nOutside either face: "<<either<<" / "<<s-bad<<" = "<<100.0*either/(s-bad)<<"%\n";'
+
+
 ```
 # HMS collimator acceptance study
 
